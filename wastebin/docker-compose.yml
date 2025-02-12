@@ -1,0 +1,20 @@
+services:
+  wastebin:
+    environment:
+      - "WASTEBIN_DATABASE_PATH=/data/state.db"
+    networks:
+      - traefik
+    volumes:
+      - './data:/data'
+    image: 'quxfoo/wastebin:latest'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wastebin.rule=Host(`waste.frotting.services`)"
+      - "traefik.http.routers.wastebin.entrypoints=websecure"
+      - "traefik.http.routers.wastebin.tls=true"
+      - "traefik.http.routers.wastebin.tls.certresolver=le"
+      - "traefik.http.services.wastebin.loadbalancer.server.port=8088"
+
+networks:
+  traefik:
+    external: true
