@@ -16,6 +16,10 @@
 
 [entryPoints.websecure]
   address = ":443"
+  [entryPoints.websecure.transport.respondingTimeouts]
+    readTimeout = "600s"
+    idleTimeout = "600s"
+    writeTimeout = "600s"
 
 [certificatesResolvers.le.acme]
   email = "lizzy@lizainslie.dev"
