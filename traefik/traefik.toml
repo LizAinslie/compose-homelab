@@ -1,0 +1,30 @@
+[log]
+  level = "DEBUG"
+
+[api]
+  insecure = true
+
+[providers.docker]
+  endpoint = "unix:///var/run/docker.sock"
+  network = "traefik"
+
+[entryPoints.web]
+  address = ":80"
+  [entryPoints.web.http.redirections.entryPoint]
+    to = "websecure"
+    scheme = "https"
+
+[entryPoints.websecure]
+  address = ":443"
+
+[certificatesResolvers.le.acme]
+  email = "lizzy@lizainslie.dev"
+  storage = "/letsencrypt/acme.json"
+  #caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  #[certificatesResolvers.le.acme.httpChallenge]
+  #  entryPoint = "web"
+  [certificatesResolvers.le.acme.dnsChallenge]
+    provider = "cloudflare"
+    resolvers = ["1.1.1.1:53", "8.8.8.8:53"]
+    propagation.delayBeforeChecks = "10s"
+

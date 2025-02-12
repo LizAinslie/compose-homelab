@@ -1,0 +1,35 @@
+services:
+  adminer:
+    image: adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+      - traefik
+    labels:
+      - "traefik.http.routers.adminer.rule=Host(`adminer.ryuma.lizainslie.dev`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+
+  postgres:
+    image: postgres
+    restart: always
+    container_name: postgres
+    environment:
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+      - "TZ=America/Chicago"
+    volumes:
+      - "./db:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+
+networks:
+  traefik:
+    external: true
+  postgres:
+    external: true

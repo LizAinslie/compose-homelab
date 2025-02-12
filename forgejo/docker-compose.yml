@@ -1,0 +1,31 @@
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:10
+    container_name: forgejo
+    environment:
+      - "USER_UID=1000"
+      - "USER_GID=1000"
+      - "DB_TYPE=postgres"
+      - "DB_HOST=postgres:5432"
+      - "DB_NAME=forgejo"
+      - "DB_USER=forgejo"
+      - "DB_PASSWD=${FORGEJO_POSTGRES_PASSWORD}"
+    #links:
+    #  - postgres
+    networks:
+      - traefik
+      - postgres
+    volumes:
+      - ./forgejo:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.forgejo.rule=Host(`git.lizainslie.dev`)"
+      - "traefik.http.routers.forgejo.entrypoints=websecure"
+      - "traefik.http.routers.forgejo.tls.certresolver=le"
+      - "traefik.http.services.gitea.loadbalancer.server.port=3000"
+
+networks:
+  traefik:
+    external: true
+  postgres:
+    external: true
