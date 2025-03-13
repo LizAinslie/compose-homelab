@@ -1,0 +1,92 @@
+services:
+  stalwart:
+    image: stalwartlabs/mail-server:latest
+    restart: unless-stopped
+    hostname: "mail.frotting.services"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./data:/opt/stalwart-mail"
+      - "traefik_certs:/data/certs:ro"
+      - "./blobs:/var/lib/data/blobs"
+    networks:
+      postgres:
+      stal:
+      traefik:
+        #ipv4_address: 172.19.0.5
+    ports:
+      - "25:25"
+      - "465:465"
+      - "993:993"
+    environment:
+      - REDIS_PASSWORD
+      - POSTGRES_PASSWORD
+    labels:
+      - "traefik.enable=true"
+      #- "traefik.docker.network=stalwart"
+
+      - "traefik.http.routers.mailserver.rule=Host(`mail.frotting.services`) || Host(`autodiscover.frotting.services`) || Host(`autoconfig.frotting.services`) || Host(`mta-sts.frotting.services`)"
+      - "traefik.http.routers.mailserver.entrypoints=websecure"
+      - "traefik.http.routers.mailserver.service=mailserver"
+      - "traefik.http.services.mailserver.loadbalancer.server.port=8080"
+
+      #- "traefik.tcp.routers.smtp.rule=HostSNI(`*`)"
+      #- "traefik.tcp.routers.smtp.entrypoints=smtp"
+      #- "traefik.tcp.routers.smtp.service=smtp"
+      #- "traefik.tcp.services.smtp.loadbalancer.server.port=25"
+      #- "traefik.tcp.services.smtp.loadbalancer.proxyProtocol.version=2"
+
+      #- "traefik.tcp.routers.jmap.rule=HostSNI(`*`)"
+      #- "traefik.tcp.routers.jmap.tls.passthrough=true"
+      #- "traefik.tcp.routers.jmap.entrypoints=websecure"
+      #- "traefik.tcp.routers.jmap.service=jmap"
+      #- "traefik.tcp.services.jmap.loadbalancer.server.port=443"
+      #- "traefik.tcp.services.jmap.loadbalancer.proxyProtocol.version=2"
+
+      #- "traefik.tcp.routers.smtps.rule=HostSNI(`*`)"
+      #- "traefik.tcp.routers.smtps.tls.passthrough=true"
+      #- "traefik.tcp.routers.smtps.entrypoints=smtps"
+      #- "traefik.tcp.routers.smtps.service=smtps"
+      #- "traefik.tcp.services.smtps.loadbalancer.server.port=465"
+      #- "traefik.tcp.services.smtps.loadbalancer.proxyProtocol.version=2"
+
+      #- "traefik.tcp.routers.imaps.rule=HostSNI(`*`)"
+      #- "traefik.tcp.routers.imaps.tls.passthrough=true"
+      #- "traefik.tcp.routers.imaps.entrypoints=imaps"
+      #- "traefik.tcp.routers.imaps.service=imaps"
+      #- "traefik.tcp.services.imaps.loadbalancer.server.port=993"
+      #- "traefik.tcp.services.imaps.loadbalancer.proxyProtocol.version=2"
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      - REDIS_PASSWORD
+    command: "redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}"
+    volumes:
+      - cache:/data
+    networks:
+      - stal
+
+networks:
+  postgres:
+    external: true
+  traefik:
+    external: true
+  stal:
+    internal: true
+  #stalwart:
+  #  name: stalwart
+  #  driver: bridge
+  #  ipam:
+  #    config:
+  #      - subnet: 172.19.0.0/16
+  #        ip_range: 172.19.0.0/24
+  #        gateway: 172.19.0.254
+  #  driver_opts:
+  #    com.docker.network.bridge.name: stalwart0
+
+volumes:
+  traefik_certs:
+    external: true
+  cache:
+    driver: local

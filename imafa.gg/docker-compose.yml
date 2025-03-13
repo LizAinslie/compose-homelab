@@ -1,0 +1,17 @@
+services:
+  imafagg:
+    image: "docker.frotting.services/imafagg-astro"
+    restart: "always"
+    container_name: "imafaggot"
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.imafaggot.rule=Host(`imafa.gg`)"
+      - "traefik.http.routers.imafaggot.entrypoints=websecure"
+      - "traefik.http.routers.imafaggot.tls.certresolver=le"
+      - "traefik.http.services.imafaggot.loadbalancer.server.port=4321"
+
+networks:
+  traefik:
+    external: true

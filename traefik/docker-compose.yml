@@ -2,50 +2,40 @@ services:
   traefik:
     image: "traefik:v3.3"
     container_name: "traefik"
+    restart: always
     environment:
       - "CF_API_EMAIL=${CF_API_EMAIL}"
       - "CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}"
     networks:
-      - "traefik"
-    command:
-      #- "--log.level=DEBUG"
-      #- "--api.insecure=true"
-      #- "--providers.docker=true"
-      #- "--providers.docker.exposedByDefault=false"
-      #- "--providers.docker.network=traefik"
-      #- "--entryPoints.web.address=:80"
-      #- "--entryPoints.web.http.redirections.entryPoint.to=websecure"
-      #- "--entryPoints.web.http.redirections.entryPoint.scheme=https"
-      #- "--entryPoints.websecure.address=:443"
-      #- "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      #- "--certificatesResolvers.le.acme.dnsChallenge=true"
-      #- "--certificatesResolvers.le.acme.dnsChallenge.provider=cloudflare"
-      #- "--certificatesResolvers.le.acme.dnsChallenge.delayBeforeChecks=10"
-      #- "--certificatesResolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      #- "--certificatesResolvers.le.acme.email=lizzy@lizainslie.dev"
-      #- "--certificatesResolvers.le.acme.storage=/letsencrypt/acme.json"
+      traefik:
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
+      #- "22:22"
+      #- "25:25"
+      #- "465:465"
+      #- "993:993"
     volumes:
-      - "./traefik.toml:/etc/traefik/traefik.toml"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./traefik.yml:/etc/traefik/traefik.yml"
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
-  #whoami:
-  #  image: "traefik/whoami"
-  #  container_name: "traefik-whoami"
-  #  networks:
-  #    - "traefik"
-  #  labels:
-  #    - "traefik.enable=true"
-  #    - "traefik.http.routers.whoami.rule=Host(`whoami.ryuma.lizainslie.dev`)"
-  #    - "traefik.http.routers.whoami.entryPoints=websecure"
-  #    - "traefik.http.routers.whoami.tls=true"
-  #    - "traefik.http.routers.whoami.tls.certresolver=le"
-  #    - "traefik.http.services.whoami.loadBalancer.server.port=80"
+  traefik-certs-dumper:
+    image: "ghcr.io/kereis/traefik-certs-dumper:latest"
+    container_name: "traefik-certs-dumper"
+    restart: unless-stopped
+    depends_on:
+      - traefik
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./letsencrypt:/traefik:ro"
+      - "traefik_certs:/output"
 
 networks:
   traefik:
+    external: true
+
+volumes:
+  traefik_certs:
     external: true

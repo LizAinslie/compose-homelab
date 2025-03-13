@@ -1,6 +1,7 @@
 services:
   adminer:
     image: adminer
+    container_name: adminer
     environment:
       ADMINER_DEFAULT_SERVER: postgres
     depends_on:

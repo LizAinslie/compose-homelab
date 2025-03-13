@@ -1,0 +1,7 @@
+FirstInstance:
+  Org:
+    Name: "Frotting Services"
+    Human:
+      # use the loginname root@my-org.my.domain
+      UserName: "root"
+      Password: "jhgi6cCfovvrXk!"

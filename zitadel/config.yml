@@ -1,0 +1,13 @@
+ExternalSecure: true
+ExternalDomain: "id.frotting.services"
+ExternalPort: 443
+
+DefaultInstance:
+  SMTPConfiguration:
+    SMTP:
+      Host: "mail.frotting.services:25"
+      User: "zitadel@frotting.services"
+      Password: "3CR8e6LuPw3f9s"
+    From: "zitadel@frotting.services"
+    FromName: "Zitadel"
+    ReplyToAddress: "noreply@frotting.services"

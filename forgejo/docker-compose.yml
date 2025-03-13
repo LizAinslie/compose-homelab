@@ -10,19 +10,26 @@ services:
       - "DB_NAME=forgejo"
       - "DB_USER=forgejo"
       - "DB_PASSWD=${FORGEJO_POSTGRES_PASSWORD}"
-    #links:
-    #  - postgres
+    ports:
+      - "22:22"
     networks:
       - traefik
       - postgres
     volumes:
-      - ./forgejo:/data
+      - "./forgejo:/data"
+      - "/home/git/.ssh/:/data/git/.ssh"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.forgejo.rule=Host(`git.lizainslie.dev`)"
       - "traefik.http.routers.forgejo.entrypoints=websecure"
       - "traefik.http.routers.forgejo.tls.certresolver=le"
       - "traefik.http.services.forgejo.loadbalancer.server.port=3000"
+
+      #- "traefik.tcp.routers.forgejo-ssh.rule=HostSNI(`*`)"
+      #- "traefik.tcp.routers.forgejo-ssh.entrypoints=git_ssh"
+      #- "traefik.tcp.routers.forgejo-ssh.loadbalancer.server.port=22"
 
 networks:
   traefik:

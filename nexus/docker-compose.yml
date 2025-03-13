@@ -1,0 +1,27 @@
+services:
+  nexus:
+    image: "sonatype/nexus3"
+    restart: "always"
+    container_name: "nexus"
+    volumes:
+      - "./data:/sonatype-work"
+    networks:
+      traefik:
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.nexus.rule=Host(`repo.frotting.services`)"
+      - "traefik.http.routers.nexus.entrypoints=websecure"
+      - "traefik.http.routers.nexus.tls.certresolver=le"
+      - "traefik.http.routers.nexus.service=nexus"
+      - "traefik.http.services.nexus.loadbalancer.server.port=8081"
+
+      - "traefik.http.routers.registry.rule=Host(`docker.frotting.services`)"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls.certresolver=le"
+      - "traefik.http.routers.registry.service=registry"
+      - "traefik.http.services.registry.loadbalancer.server.port=8082"
+      - "traefik.http.middlewares.limit.buffering.maxRequestBodyBytes=1000000000" # 1gb max upload
+networks:
+  traefik:
+    external: true
